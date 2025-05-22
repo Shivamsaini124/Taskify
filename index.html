@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container"></div>
+
+    <!-- Hidden Div -->
+    <div tabindex="-1" id="add-task">
+        <div id="add-task-label-bar">
+            <p id="add-task-label"> Add Task</p>
+            <button id="add-task-close-button"><img id="cross" src="cross.png" onclick="closeAddArea()"></button>
+        </div>
+        <input class="task-input" id="task-title-input" type="text" placeholder="Enter Task Title">
+        <textarea class="task-input" id="task-description-input" rows="4" placeholder="Enter Task Description"></textarea>
+        <button id="add-task-button" onclick="addTask()">Add Task</button>
+    </div>
+</body>
+<script src="script.js"></script>
+</html>
