@@ -1,43 +1,80 @@
-//varibles of each task
-let sections = [["To Do","to-do",{}], ["In Progress","in-progress",{}], ["Under Review","under-review",{}], ["Finished","finished",{}]];
+//Differnet Sections
+//Every title is in title case (first letter of every word is capital)
+let sections = [
+    {
+        title:"To Do",
+        id:"to-do"
+    },
+    {
+        title:"In Progress",
+        id:"in-progress"
+    },
+    {
+        title:"Under Review",
+        id:"under-review"
+    }, 
+    {
+        title:"Finished",
+        id:"finished"
+    }
+];
+
+//Todos
+/*
+[
+    {
+        "title": " ",
+        "description": "",
+        "section": ""
+    },
+    {
+        "title": " ",
+        "description": "",
+        "section": ""
+    }
+    ]
+*/
+let todos = [];
+
 
 //Hidden Div
 const hiddenDiv = document.getElementById("add-task");
 
 //determine focused area
-let focusedTasksIndex = 0;
+let focusedSection = "To Do";
 
 //function creation of basic structure
 const createArea = (section, index) => {
     //area
     const area = document.createElement("div");
     area.classList.add("tasks-area");
-    area.id = `${section[1]}-area`;
+    area.id = `${section["id"]}-area`;
     area.addEventListener("dragover",(e) => {
         e.preventDefault();
         const draggable = document.querySelector(".dragging");
         taskDiv.appendChild(draggable);
-        console.log("over");
+        let taskTitle = draggable.querySelector(".task-title").innerText;
+        let todo = todos.find(todoObj => {return todoObj.title === taskTitle});
+        todo["section"] = section["title"];
     })
 
     //heading
     const heading = document.createElement("h3");
     heading.classList.add("heading");
-    heading.innerText = section[0];
+    heading.innerText = section["title"];
     area.appendChild(heading);
 
     //task div
     const taskDiv = document.createElement("div");
     taskDiv.classList.add("task-div");
-    taskDiv.id = `${section[1]}-div`;
+    taskDiv.id = `${section["id"]}-div`;
     area.appendChild(taskDiv);
 
     //add new button
     const button = document.createElement("button");
     button.classList.add("add-new-button");
     button.addEventListener("click",()=>{
-        focusedTasksIndex = index;
-        console.log(focusedTasksIndex);
+        focusedSection = section["title"];
         hiddenDiv.style.visibility = "visible";
         hiddenDiv.focus();
     })
@@ -90,12 +127,10 @@ const createTask = (taskTitle, taskDescription) => {
     div.addEventListener("dragstart", () => {
         div.classList.add("dragging");
         div.style.opacity = 0.5;
-        console.log("dragging");
     })
     div.addEventListener("dragend", () => {
         div.classList.remove("dragging");
         div.style.opacity = 1;
-        console.log("dragging Stopped");
     })
 
     const title = document.createElement("h3");
@@ -111,41 +146,67 @@ const createTask = (taskTitle, taskDescription) => {
     return div;
 }
 
+//Check Presence of a task
+const isPresent = (taskTitle) => {
+    todos.forEach(taksObj => {
+        if(taksObj["title"] === taskTitle) return true;
+    });
+    return false;
+}
+
+//Create task Object
+const createTaskObj = (taskTitle, taskDescription, taskSection) => {
+    const Obj = {}
+    Obj["title"] = taskTitle;
+    Obj["description"] = taskDescription;
+    Obj["section"] = taskSection;
+
+    return Obj;
+}
+
 //Add task button
 const addTask = () => {
     const taskTitleInput = document.getElementById("task-title-input");
     const taskDescriptionInput = document.getElementById("task-description-input");
 
-    const title = taskTitleInput.value;
-    const description = taskDescriptionInput.value;
+    const title = taskTitleInput.value.trim();
+    const description = taskDescriptionInput.value.trim();
 
     if(title == "" || description == ""){
         alert("Please Enter both Title and Description of Task");
         return;
     }
-
-    for(let i=0; i<4; i++){
-        if(title in sections[i][2]){
-            alert("Task already exists");
-            return;
-        }
+    else if(isPresent(title)){
+        alert("Task already exists");
+        return;
     }
 
-    sections[focusedTasksIndex][2][title] = description;
+    todos.push(createTaskObj(title, description, focusedSection))
     hiddenDiv.style.visibility = "hidden";
     render();
 }
 
+//This function returns the id for a given section title
+const getId = (sectionTitle) => {
+    let section = sections.find(sec => {return sec.title === sectionTitle});
+    return section ? section.id : null;
+}
+
 //render function for task container
 const render = () => {
-    const focusedTaskDiv = document.getElementById(`${sections[focusedTasksIndex][1]}-div`);
-    focusedTaskDiv.innerHTML = "";
-    focusedTasksObj = sections[focusedTasksIndex][2];
-
-    Object.keys(focusedTasksObj).forEach((taskTitle)=> {
-        const task = createTask(taskTitle, focusedTasksObj[taskTitle]);
-        focusedTaskDiv.appendChild(task);
+    //clear the existing to-do's from all areas
+    let taskDivs = [...document.getElementsByClassName("task-div")]; 
+    taskDivs.forEach((taskDiv) => {
+        taskDiv.innerHTML = "";
     })
+
+
+    //creating and appending divs for all todos
+    todos.forEach(todoObj => {
+        const focusedTaskDiv = document.getElementById(`${getId(todoObj["section"])}-div`);
+        const task = createTask(todoObj["title"], todoObj["description"]);
+        focusedTaskDiv.appendChild(task);
+    });
 }
 
 render();
